@@ -21,7 +21,7 @@ const authenticate = () => {
 				res.send({ data: { message: 'User not found', code: 404 } });
 			}
 
-			const token = jwt.sign({ id: userResponse.id }, 'motherlode').toString();
+			const token = jwt.sign({ id: userResponse.id }, 'kjkszpj').toString();
 			console.log(token, '{++++++++++++++++++++++++++++');
 			await userRepository.update({ id: userResponse.id }, { token });
 
@@ -41,7 +41,7 @@ const authenticate = () => {
 
 	router.put('/logout/:username', authentication, async (req, res) => {
 		const userRepository = getRepository(User);
-		const { username } = req.params;
+    const { username } = req.params;
 
 		try {
 			const token = '';

@@ -4,6 +4,8 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import user from './routes/user';
 import authenticate from './routes/login';
+import recipe from './routes/recipe';
+import ingredient from './routes/ingredient';
 
 createConnection()
 	.then(async connection => {
@@ -13,6 +15,8 @@ createConnection()
 
 		app.use('/user', user);
 		app.use('/authenticate', authenticate);
+		app.use('/recipe', recipe);
+		app.use('/ingredient', ingredient);
 
 		app.listen(3000, () => {
 			console.log('Started on port 3000!');

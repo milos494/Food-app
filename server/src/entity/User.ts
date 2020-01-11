@@ -7,6 +7,7 @@ import {
 	OneToMany,
 } from 'typeorm';
 import { Recipes } from './Recipes';
+import { Ingredients } from './Ingredients';
 
 @Entity()
 export class User {
@@ -45,4 +46,10 @@ export class User {
 		recipe => recipe.user,
 	)
 	recipes: Recipes[];
+
+	@OneToMany(
+		type => Ingredients,
+		ingredient => ingredient.user,
+	)
+	ingredients: Ingredients[];
 }

@@ -9,13 +9,16 @@ export const authentication = async (req, res, next) => {
 		const user = await userRepository
 			.createQueryBuilder('user')
 			.where('user.token = :token', { token })
-			.execute();
+			.getOne();
 
+		console.log(user, '******************************');
 		if (!user) {
-			return Promise.reject();
+			throw new Error("User doesn't exist!");
 		}
 
-		req.user = user;
+		req.body.userData = {};
+		req.body.userData.id = user.id;
+		req.body.userData.type = user.type;
 		next();
 	} catch (e) {
 		console.log(e);

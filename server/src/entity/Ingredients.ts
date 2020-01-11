@@ -1,22 +1,44 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { RecipeIngredients } from "./RecipesIngredients";
+import {
+	Entity,
+	PrimaryGeneratedColumn,
+	Column,
+	OneToMany,
+	ManyToMany,
+	ManyToOne,
+} from 'typeorm';
+import { RecipeIngredients } from './RecipesIngredients';
+import { User } from './User';
 
 @Entity()
 export class Ingredients {
+	// @OneToMany(type => RecipeIngredients, recipeIngredient => recipeIngredient.ingredientId)
+	@PrimaryGeneratedColumn()
+	id: number;
 
-  // @OneToMany(type => RecipeIngredients, recipeIngredient => recipeIngredient.ingredientId)
-  @PrimaryGeneratedColumn()
-  id: number;
+	@Column({ length: 100 })
+	name: string;
 
-  @Column({ length: 100 })
-  name: string;
+	@Column({ length: 30 })
+	unitOfMeasure: string;
 
-  @Column({ length: 30 })
-  unitOfMeasure: string;
+	@Column({ length: 100 })
+	image: string;
 
-  @Column({ length: 100 })
-  image: string;
+	@Column({ default: false })
+	validatedByAdmin: boolean;
 
-  @OneToMany(type => RecipeIngredients, recipeIngredient => recipeIngredient.ingredient)
-  recipeIngredients: RecipeIngredients[];
+	@Column({ default: '' })
+	description: string;
+
+	@OneToMany(
+		type => RecipeIngredients,
+		recipeIngredient => recipeIngredient.ingredient,
+	)
+	recipeIngredients: RecipeIngredients[];
+
+	@ManyToOne(
+		type => User,
+		user => user.ingredients,
+	)
+	user: User;
 }
