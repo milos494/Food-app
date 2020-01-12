@@ -11,17 +11,13 @@ export const authentication = async (req, res, next) => {
 			.where('user.token = :token', { token })
 			.getOne();
 
-		console.log(user, '******************************');
 		if (!user) {
 			throw new Error("User doesn't exist!");
 		}
 
-		req.body.userData = {};
-		req.body.userData.id = user.id;
-		req.body.userData.type = user.type;
+		req.user = user;
 		next();
 	} catch (e) {
-		console.log(e);
 		res.status(401).send();
 	}
 };

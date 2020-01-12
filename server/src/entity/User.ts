@@ -1,27 +1,18 @@
-import {
-	Entity,
-	PrimaryGeneratedColumn,
-	Column,
-	CreateDateColumn,
-	UpdateDateColumn,
-	OneToMany,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Recipes } from './Recipes';
 import { Ingredients } from './Ingredients';
+import { Ratings } from './Ratings';
 
 @Entity()
 export class User {
 	@PrimaryGeneratedColumn()
-	id: number;
+	readonly id: number;
 
 	@Column({ unique: true })
 	email: string;
 
 	@Column()
 	password: string;
-
-	@Column({ unique: true })
-	username: string;
 
 	@Column({ length: 50 })
 	firstName: string;
@@ -52,4 +43,10 @@ export class User {
 		ingredient => ingredient.user,
 	)
 	ingredients: Ingredients[];
+
+	@OneToMany(
+		type => Ratings,
+		rating => rating.user,
+	)
+	ratings: Ratings[];
 }

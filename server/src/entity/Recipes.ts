@@ -12,7 +12,7 @@ import { Ratings } from './Ratings';
 @Entity()
 export class Recipes {
 	@PrimaryGeneratedColumn()
-	id: number;
+	readonly id: number;
 
 	@Column({ length: 100 })
 	name: string;

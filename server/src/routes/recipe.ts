@@ -1,18 +1,16 @@
 import * as express from 'express';
-import * as jwt from 'jsonwebtoken';
-import { getRepository, createQueryBuilder } from 'typeorm';
+import { getRepository } from 'typeorm';
 import { authentication } from '../middleware/authentication';
 import { Recipes } from '../entity/Recipes';
 import { RecipeIngredients } from '../entity/RecipesIngredients';
-import { User } from '../entity/User';
 import { Ingredients } from '../entity/Ingredients';
+import { request } from '../types';
 
 const recipe = () => {
 	const router = express.Router();
 
 	router.get('/', async (req, res) => {
 		const recipeRepository = getRepository(Recipes);
-		const ingredientsRecipesRepository = getRepository(RecipeIngredients);
 		const { ingredients } = req.query;
 
 		try {
@@ -20,9 +18,6 @@ const recipe = () => {
 			if (!ingredients) {
 				recipes = await recipeRepository.find();
 			} else {
-				// const recipeIngredient = ingredientsRecipesRepository.createQueryBuilder('rc').where(
-				//   'rc.ingredientId'
-				// )
 				recipes = [];
 				for (const ingredientId of ingredients) {
 					const allRecipes = await recipeRepository
@@ -37,25 +32,17 @@ const recipe = () => {
 						.getMany();
 					if (!recipes.length) {
 						recipes = allRecipes;
-						console.log('usao tu ***********');
-						console.log(allRecipes);
 					} else {
-						console.log('usao else ***********');
-						console.log(allRecipes);
 						recipes = recipes.filter(recipe => {
 							const x = allRecipes.findIndex(r => r.id === recipe.id);
-							console.log(']]]]]]]]]]]]]]]]]]]]]]]]]]]]]]');
-							console.log(x);
 							return x !== -1;
 						});
 					}
 				}
-				console.log('*//////////////////////////////////');
-				console.log(recipes);
 			}
+			res.status(200);
 			res.send({ data: { recipes, code: 200 } });
 		} catch (e) {
-			console.log(e);
 			res.status(400).send();
 		}
 	});
@@ -72,8 +59,7 @@ const recipe = () => {
 		}
 	});
 
-	router.post('/', authentication, async (req, res) => {
-		console.log('usao sam tu');
+	router.post('/', authentication, async (req: request, res) => {
 		let {
 			name,
 			preparation,
@@ -83,20 +69,16 @@ const recipe = () => {
 			prearationTime,
 			numberOfPersons,
 		} = req.body;
+		const { user } = req;
+
 		const recipeRepository = getRepository(Recipes);
 		const ingredientsRecipesRepository = getRepository(RecipeIngredients);
 		const IngredientRepository = getRepository(Ingredients);
-		const userRepository = getRepository(User);
+
 		const recipe = new Recipes();
 		const ingredientRecipe = new RecipeIngredients();
 
 		try {
-			const user: User = await userRepository
-				.createQueryBuilder('user')
-				.where('user.id = :id', { id: req.body.userId })
-				.getOne();
-			console.log('sam tu');
-			console.log(user);
 			recipe.name = name;
 			recipe.preparation = preparation;
 			recipe.image = image;
@@ -108,6 +90,7 @@ const recipe = () => {
 			if (prearationTime) {
 				recipe.preparationTime = prearationTime;
 			}
+
 			await recipeRepository.save(recipe);
 
 			ingredientRecipe.recipe = recipe;
@@ -122,6 +105,7 @@ const recipe = () => {
 				await ingredientsRecipesRepository.save(ingredientRecipe);
 			});
 
+			res.status(201);
 			res.send({
 				data: { message: 'Recipe successfully created!', code: 201 },
 			});
@@ -130,9 +114,94 @@ const recipe = () => {
 		}
 	});
 
-	router.put('/:id', authentication, async (req, res) => {});
+	router.put('/:id', authentication, async (req: request, res) => {
+		const recipeRepository = getRepository(Recipes);
+		const { user } = req;
+		const { id } = req.params;
+		const {
+			name,
+			description,
+			preparation,
+			preparationTime,
+			numberOfPersons,
+			image,
+		} = req.body;
 
-	router.delete('/:id', authentication, async (req, res) => {});
+		try {
+			const recipe: Recipes = await recipeRepository.findOne(id);
+			if (!recipe) {
+				res.status(404);
+				res.send({ data: { message: 'Recipe not found', code: 404 } });
+				return;
+			}
+
+			if (recipe.user.id !== user.id || user.type !== 'admin') {
+				res.status(403);
+				res.send({
+					data: {
+						message: 'Recipe can be changed only by creator or admin!',
+						code: 403,
+					},
+				});
+				return;
+			}
+
+			if (name) {
+				recipe.name = name;
+			}
+
+			if (description) {
+				recipe.description = description;
+			}
+
+			if (preparation) {
+				recipe.preparation = preparation;
+			}
+
+			if (preparationTime) {
+				recipe.preparationTime = preparationTime;
+			}
+
+			if (numberOfPersons) {
+				recipe.numberOfPersons = numberOfPersons;
+			}
+
+			if (image) {
+				recipe.image = image;
+			}
+
+			await recipeRepository.save(recipe);
+
+			res.status(200);
+			res.send({
+				data: { message: 'Recipe successfully updated!', code: 200 },
+			});
+		} catch (e) {
+			res.status(400).send();
+		}
+	});
+
+	router.delete('/:id', authentication, async (req: request, res) => {
+		const recipeRepository = getRepository(Recipes);
+		const { user } = req;
+		const { id } = req.params;
+
+		if (user.type !== 'admin') {
+			res.status(403);
+			res.send({ data: { message: 'Recipe can be deleted only by admin!' } });
+			return;
+		}
+
+		try {
+			await recipeRepository.delete(id);
+			res.status(200);
+			res.send({
+				data: { message: 'Recipe successfully deleted!', code: 200 },
+			});
+		} catch (e) {
+			res.status(400).send();
+		}
+	});
 
 	return router;
 };

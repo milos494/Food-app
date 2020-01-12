@@ -11,11 +11,10 @@ import { User } from './User';
 
 @Entity()
 export class Ingredients {
-	// @OneToMany(type => RecipeIngredients, recipeIngredient => recipeIngredient.ingredientId)
 	@PrimaryGeneratedColumn()
-	id: number;
+	readonly id: number;
 
-	@Column({ length: 100 })
+	@Column({ length: 100, unique: true })
 	name: string;
 
 	@Column({ length: 30 })
