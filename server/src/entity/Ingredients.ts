@@ -38,6 +38,7 @@ export class Ingredients {
 	@ManyToOne(
 		type => User,
 		user => user.ingredients,
+		{ onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
 	)
 	user: User;
 }

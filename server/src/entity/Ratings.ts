@@ -20,6 +20,7 @@ export class Ratings {
 	@ManyToOne(
 		type => User,
 		user => user.ratings,
+		{ onDelete: 'CASCADE', onUpdate: 'RESTRICT' },
 	)
 	user: User;
 
@@ -29,6 +30,7 @@ export class Ratings {
 	@ManyToOne(
 		type => Recipes,
 		recipe => recipe.ratings,
+		{ onDelete: 'CASCADE', onUpdate: 'RESTRICT' },
 	)
 	recipe: Recipes;
 }

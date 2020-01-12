@@ -22,12 +22,14 @@ export class RecipeIngredients {
 	@ManyToOne(
 		type => Recipes,
 		recipe => recipe.recipeIngredients,
+		{ onDelete: 'CASCADE', onUpdate: 'RESTRICT' },
 	)
 	recipe: Recipes;
 
 	@ManyToOne(
 		type => Ingredients,
 		ingredient => ingredient.recipeIngredients,
+		{ onDelete: 'CASCADE', onUpdate: 'RESTRICT' },
 	)
 	ingredient: Ingredients;
 
