@@ -128,14 +128,18 @@ const recipe = () => {
 		} = req.body;
 
 		try {
-			const recipe: Recipes = await recipeRepository.findOne(id);
+			const recipe = await recipeRepository
+				.createQueryBuilder('recipe')
+				.leftJoinAndSelect('recipe.user', 'user')
+				.where('recipe.id = :id', { id })
+				.getOne();
 			if (!recipe) {
 				res.status(404);
 				res.send({ data: { message: 'Recipe not found', code: 404 } });
 				return;
 			}
 
-			if (recipe.user.id !== user.id || user.type !== 'admin') {
+			if (recipe.user.id !== user.id && user.type !== 'admin') {
 				res.status(403);
 				res.send({
 					data: {

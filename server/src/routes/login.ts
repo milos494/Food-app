@@ -1,4 +1,5 @@
 import * as express from 'express';
+import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { User } from '../entity/User';
 import { getRepository } from 'typeorm';
@@ -23,16 +24,23 @@ const logInOut = () => {
 				return;
 			}
 
-			const token = jwt.sign({ id: userResponse.id }, 'kjkszpj').toString();
-			await userRepository.update({ id: userResponse.id }, { token });
+			bcrypt.compare(password, userResponse.password, async (err, result) => {
+				if (result) {
+					const token = jwt.sign({ id: userResponse.id }, 'kjkszpj').toString();
+					await userRepository.update({ id: userResponse.id }, { token });
 
-			res.status(200);
-			res.send({
-				data: {
-					token,
-					message: 'User has been successfully logged in',
-					code: 200,
-				},
+					res.status(200);
+					res.send({
+						data: {
+							token,
+							message: 'User has been successfully logged in',
+							code: 200,
+						},
+					});
+				} else {
+					res.status(403);
+					res.send({ data: { message: 'Wrong password!', code: 403 } });
+				}
 			});
 		} catch (e) {
 			res.status(400).send();
